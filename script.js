@@ -35,16 +35,10 @@ const GAP = 150; // Gap between the top and bottom pipes
 const MIN_PIPE_HEIGHT = 20; // Minimum height for pipes
 
 function setup() {
-    // Handle keydown events for keyboard input
-    document.addEventListener('keydown', (event) => {
-        if (event.code === 'Space') {
-            if (gameOver) {
-                restartGame(); // Restart game if it's over
-            } else {
-                bird.velocity = bird.lift; // Set velocity to lift value for a stronger flap
-            }
-        }
-    });
+    // Clear previous pipes and reset variables if necessary
+    if (pipeGenerationIntervalId) {
+        clearInterval(pipeGenerationIntervalId);
+    }
 
     // Generate pipes at regular intervals
     pipeGenerationIntervalId = setInterval(() => {
@@ -60,12 +54,21 @@ function setup() {
     }, PIPE_GENERATION_INTERVAL);
     
     // Add event listeners for input handling
+    document.addEventListener('keydown', (event) => {
+        if (event.code === 'Space') {
+            if (gameOver) {
+                restartGame(); // Restart game if it's over
+            } else {
+                bird.velocity = bird.lift; // Set velocity to lift value for a stronger flap
+            }
+        }
+    });
+
     canvas.addEventListener('click', handleInput);
     canvas.addEventListener('touchstart', handleInput);
-    
+
     gameLoop();
 }
-
 function gameLoop() {
     if (gameOver) {
         drawGameOverMenu(); // Show game over menu when game is over
@@ -209,7 +212,6 @@ function handleInput(event) {
         }
     }
 }
-
 // Restart the game
 function restartGame() {
     bird.y = canvas.height / 2; // Reset the bird's position
@@ -219,8 +221,9 @@ function restartGame() {
     gameOver = false; // Reset the game over flag
     pipeSpeed = 2; // Reset pipe speed
 
-    // Clear the pipe generation interval
+    // Clear the pipe generation interval if it exists
     clearInterval(pipeGenerationIntervalId); // Stop the current pipe generation
+    pipeGenerationIntervalId = null; // Set to null to indicate no active interval
 
     // Re-initialize the game and add input event listeners again
     setup(); // Start the game loop again
